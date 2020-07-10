@@ -1,25 +1,55 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System;
 
 public class Planet : MonoBehaviour {
 
     public Transform cellHolder;
-
-    List<PlanetCell> cells;
-   
-
-    public void Init() {
-        //instciate cells 
-        cells = new List<PlanetCell>(cellHolder.childCount);
-        for (int i = 0; i < cells.Count; i++) {
-            cells[i] = new PlanetCell( cellHolder.GetChild(i).gameObject, CellType.Base);
-        }
+    
+    public Material matEau;
+    PlanetCell[] cells;
+    //[Range(0.58f,0.59f)]
+    public float rayon;
+    public Transform Pivot;
+    public float rotationSpeed = 1;
+    private void Awake() {
+        Init();
     }
 
 
-    public void Paint(PlanetCell source,float rayon,CellType Type) {
+    private void Update() {
 
+        Pivot.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+
+        if (Input.GetMouseButtonDown(0)) {
+            RaycastHit cell = HexCellByRC();
+            Paint(cell, rayon, CellType.Eau);
+        }
+    }
+
+    public void Init() {
+        //instciate cells 
+        cells = new PlanetCell[cellHolder.childCount];
+        for (int i = 0; i < cells.Length; i++) {
+            cells[i] = new PlanetCell( cellHolder.GetChild(i).gameObject, CellType.Base);
+        }
+        
+    }
+
+    // point de pivot fucked trouver une soluce
+    public void Paint(RaycastHit source,float rayon,CellType Type) {
+        Debug.Log(source.point);
+        Collider[] hits = Physics.OverlapSphere(source.point, rayon,1<<8);
+        GameObject[] toColor = hits.Select(x => x.gameObject).ToArray();
+        Debug.Log(toColor.Length) ;
+        foreach (GameObject item in toColor) {
+            Debug.Log(item.name);
+            //doesnt work
+            //cells[IndexByName(item)].setCellType(CellType.Eau, matEau);  
+            item.GetComponent<MeshRenderer>().sharedMaterial = matEau;
+        }
     }
 
     //On sort les hex avec leur id
@@ -33,15 +63,29 @@ public class Planet : MonoBehaviour {
 
     //placer une raycast au milieu de la sphere et on clik lancer un rayon sur la sphere et ret
     //retourner la cell toucher
-    public PlanetCell HexCellByRC() {
-        return null;
+    public RaycastHit HexCellByRC() {
+        RaycastHit hit;
+        if (Physics.Raycast(Vector3.zero, Vector3.forward, out hit, Mathf.Infinity, 1 << 8)) {
+            
+            Debug.Log(hit.collider.gameObject.name);
+            //Debug.Log(IndexByName(hit.collider.gameObject));
+            //Debug.Log(cells[IndexByName(hit.collider.gameObject)].cellObject.name);
+            return hit;
+        }
+        return hit;
     }
+
+
+    private void OnDrawGizmos() {
+        Gizmos.DrawWireSphere(transform.position, rayon);
+    }
+
 }
 
 public class PlanetCell {
-    GameObject cellObject;
-    CellType cellType;
-    bool coloried = false;
+    public GameObject cellObject;
+    public CellType cellType;
+    public bool coloried = false;
 
     public PlanetCell(GameObject cellObject, CellType cellType, bool coloried = false) {
         this.cellObject = cellObject;
@@ -49,14 +93,15 @@ public class PlanetCell {
         this.coloried = coloried;
     }
 
-    public void setCellType(CellType _type) {
-        Material mat = null;
+    public void setCellType(CellType _type , Material newmat = null) {
+        Material mat = newmat;
         switch (cellType) {
             case CellType.Base:
                 mat = new Material(Shader.Find("Standard"));
                 break;
             case CellType.Eau:
                 Debug.Log("c'est de leau");
+                mat = newmat;
                 break;
             case CellType.Terre:
                 Debug.Log("c'est de la terre");
@@ -69,6 +114,10 @@ public class PlanetCell {
         }
 
         setMaterial(mat);
+    }
+
+    public void Flag() {
+        coloried = true;
     }
     //set the marial color of this cell
     public void setMaterial(Material material) {
