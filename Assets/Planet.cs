@@ -14,6 +14,10 @@ public class Planet : MonoBehaviour {
     public float rayon;
     public Transform Pivot;
     public float rotationSpeed = 1;
+
+    public Vision vision;
+ 
+    
     private void Awake() {
         Init();
     }
@@ -25,7 +29,7 @@ public class Planet : MonoBehaviour {
 
         if (Input.GetMouseButtonDown(0)) {
             RaycastHit cell = HexCellByRC();
-            Paint(cell, rayon, CellType.Eau);
+            Paint2(cell, rayon, CellType.Eau, vision.GetTexture(20));
         }
     }
 
@@ -40,16 +44,35 @@ public class Planet : MonoBehaviour {
 
     // point de pivot fucked trouver une soluce
     public void Paint(RaycastHit source,float rayon,CellType Type) {
-        Debug.Log(source.point);
+        //Debug.Log(source.point);
         Collider[] hits = Physics.OverlapSphere(source.point, rayon,1<<8);
+        //retirer les cells deja coloré M
         GameObject[] toColor = hits.Select(x => x.gameObject).ToArray();
         Debug.Log(toColor.Length) ;
         foreach (GameObject item in toColor) {
-            Debug.Log(item.name);
+            //Debug.Log(item.name);
             //doesnt work
             //cells[IndexByName(item)].setCellType(CellType.Eau, matEau);  
             item.GetComponent<MeshRenderer>().sharedMaterial = matEau;
         }
+    }
+
+    public void Paint2(RaycastHit source, float rayon, CellType Type, Texture2D frmTxt) {
+        //Debug.Log(source.point);
+        Collider[] hits = Physics.OverlapSphere(source.point, rayon, 1 << 8);
+        //retirer les cells deja coloré M
+        GameObject[] toColor = hits.Select(x => x.gameObject).ToArray();
+        Debug.Log(toColor.Length);
+        int c = 0;
+        Debug.Log(frmTxt.texelSize);
+        Debug.Log(frmTxt.width + "  " + frmTxt.height);
+        for (int i = 0; i < frmTxt.width; i++) {
+            for (int j = 0; j < frmTxt.height; j++) {
+                toColor[c].GetComponent<MeshRenderer>().sharedMaterial.color = frmTxt.GetPixel(i,j);
+                c++;
+            }
+        }
+        
     }
 
     //On sort les hex avec leur id
