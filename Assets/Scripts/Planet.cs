@@ -101,6 +101,7 @@ public class Planet : MonoBehaviour {
                     //Debug.Log(cell.cellType);
                     UpdateTypeCount(cell.cellType);
                     toColor[c].GetComponent<MeshRenderer>().material.SetColor("_BaseColor", pcolor);
+                    //this works only with standard materials , we're working with LWRP shaders
                     //toColor[c].GetComponent<MeshRenderer>().sharedMaterial.color = pcolor;
                     c++;
                 }
@@ -185,7 +186,7 @@ public class Planet : MonoBehaviour {
         cellTypePercent[CellType.Terre] = 0;
 
         for (int i = 0; i < cells.Length; i++) {
-            cells[i].GetComponent<MeshRenderer>().sharedMaterial.color = Color.white;
+            cells[i].GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.white);
             cells[i].UnFlag();
         }
     }
@@ -217,7 +218,9 @@ public class Planet : MonoBehaviour {
     public string getHiddenName() {
         foreach (PlanetName item in PossibleNames) {
             if (Match(item)) {
-                return item.name;
+                string toreturn = item.hiddenName;
+                PossibleNames.Remove(item);
+                return toreturn;
             }
         }
         return null;
@@ -256,7 +259,7 @@ public class PlanetCell : MonoBehaviour{
 
     public PlanetCell Set(GameObject cellObject, CellType cellType, bool coloried = false) {
         this.cellObject = cellObject;
-        cellObject.GetComponent<MeshRenderer>().sharedMaterial.color = Color.white;
+        cellObject.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", Color.white);
         this.coloried = coloried;
         return this;
     }
@@ -283,19 +286,13 @@ public class PlanetCell : MonoBehaviour{
         }
     }
 
-
-  
-
     public void Flag() {
         coloried = true;
     }
     public void UnFlag() {
         coloried = false;
     }
-    //set the marial color of this cell
-    public void setMaterial(Material material) {
-        cellObject.GetComponent<MeshRenderer>().sharedMaterial = material;
-    }
+    
 }
 
 public enum CellType {
