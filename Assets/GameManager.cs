@@ -13,8 +13,12 @@ public class GameManager : MonoBehaviour {
     public List<Text> hiddenNames;
     private List<string> foundNames;
 
+    //Audio
+    AudioSource audioSource;
+
     public static bool gamestarted = false;
     private void Awake() {
+        audioSource = GetComponent<AudioSource>();
         foundNames = new List<string>();
         GameObject.FindWithTag("Planet").GetComponent<Planet>().PlanetFound += onPlanetFound;
     }
@@ -31,13 +35,17 @@ public class GameManager : MonoBehaviour {
         if (hiddenNames != null && hiddenNames.Count > 0 && !foundNames.Contains(name) ) {
             int tomdif = Random.Range(0, hiddenNames.Count - 1);
             hiddenNames[tomdif].text = name;
-            StartCoroutine(FadeTextToFullAlpha(1f, hiddenNames[tomdif]));
+            StartCoroutine(FadeTextToFullAlpha(1.5f, hiddenNames[tomdif]));
             StartCoroutine(Expand(hiddenNames[tomdif]));
             foundNames.Add(name);
         }
     }
 
-
+    void PlayClip(AudioClip clip) {
+        audioSource.clip = clip;
+        audioSource.Play();
+    }
+    
     IEnumerator start() {
         mainCameraAnimator.SetTrigger("StartGame");
 

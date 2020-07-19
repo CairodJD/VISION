@@ -13,8 +13,6 @@ using Emgu.CV.Structure;
 
 public class Vision : MonoBehaviour {
 
-
-
     VideoCapture webcam;
     Mat image;
 
@@ -31,8 +29,7 @@ public class Vision : MonoBehaviour {
             CvInvoke.Imshow("wecam", image);
             CvInvoke.WaitKey(24);
         }
-        
-
+       
         //CvInvoke.Imshow("wecam filtre 2", filtre(ref imgHSV, 2));
         //if (Input.GetKeyDown(KeyCode.Space)) {
         //    Debug.Log(image.Width + "  " + image.Height);
@@ -40,7 +37,6 @@ public class Vision : MonoBehaviour {
         //    //prite[] splitted = splitText(test, image);
         //    //divider.divide(test,32);
         //}
-
 
     }
 
@@ -64,7 +60,8 @@ public class Vision : MonoBehaviour {
 
 
 
-
+    // divise les frams (640 * 480) de la webcam en plusieurs sprite equivalent
+    // puis "coler" sur les sprites sur la sphere ??
     Sprite[] splitText(Texture2D tosplit, Mat img) {
         List<Sprite> splits = new List<Sprite>(16);
         int tilezise = 1;
@@ -82,7 +79,7 @@ public class Vision : MonoBehaviour {
         return splits.ToArray();
     }
 
-
+    // merci le cours 
     public Texture2D GetTexture(int scale = 2) {
         CvInvoke.Resize(image, image, new Size(image.Width / scale, image.Height/scale));
 

@@ -8,8 +8,6 @@ public class Planet : MonoBehaviour {
 
     public Transform cellHolder;
     
-
-
     PlanetCell[] cells;
 
     public List<PlanetName> PossibleNames;
@@ -23,8 +21,7 @@ public class Planet : MonoBehaviour {
         {CellType.Terre, 0 },
     };
 
-   
-    //[Range(0.58f,0.59f)]
+
     public float rayon;
     public Transform Pivot;
     public float rotationSpeed = 1;
@@ -37,7 +34,7 @@ public class Planet : MonoBehaviour {
     private int cellTerreCount = 0 ;
 
     [Range(5,50)]
-    public float incertitude = 10f;
+    public float incertitude = 10f; // used to compute planets configs
 
     public Animator resetanimator;
 
@@ -54,7 +51,7 @@ public class Planet : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.Return)) {
 
                 RaycastHit cell = HexCellByRC();
-                Paint2(cell, rayon, CellType.Eau, vision.GetTexture(20));
+                Paint2(cell, rayon, vision.GetTexture(20));
             }
 
             if (Input.GetKeyDown(KeyCode.R)) {
@@ -76,8 +73,8 @@ public class Planet : MonoBehaviour {
     }
 
   
-
-    public void Paint2(RaycastHit source, float rayon, CellType Type, Texture2D frmTxt) {
+    // replace touched cells color form source wihtin rayon with fromtxtc coresponding pixel color
+    public void Paint2(RaycastHit source, float rayon, Texture2D frmTxt) {
         //Debug.Log(source.point);
         Collider[] hits = Physics.OverlapSphere(source.point, rayon, 1 << 8);
         //retirer les cells deja coloré M
@@ -111,25 +108,25 @@ public class Planet : MonoBehaviour {
 
 
         if (DoneColoring()) {
-            Debug.Log("Done coloring cells");
+            //Debug.Log("Done coloring cells");
             //Update cellTypePercent dictionary
             UpdateCellTypeDico();
             //check names 
             hiddenName = getHiddenName();
             if (hiddenName != null && hiddenName.Length > 0) {
-                Debug.Log("NAME FOUND : "+hiddenName);
+                //Debug.Log("NAME FOUND : "+hiddenName);
                 if (PlanetFound != null) {
                     PlanetFound(hiddenName);
                 }
             }
-            showCellTypePercent();
+            //showCellTypePercent();
         }
 
 
 
     }
 
-
+    //just for debuging
     private void showCellTypePercent() {
         Debug.Log(" Eau : " + cellTypePercent[CellType.Eau]);
         Debug.Log(" gaz : " + cellTypePercent[CellType.Gaz]);
@@ -137,16 +134,12 @@ public class Planet : MonoBehaviour {
     }
 
     private void UpdateCellTypeDico() {
-        //Debug.Log("max " + cells.Length);
-        //Debug.Log("cellEauCount " + cellEauCount + " % "+ (float)cellEauCount / cells.Length);
-        //Debug.Log("cellGazCount " + cellGazCount + " % " + (float)cellGazCount / cells.Length);
-        //Debug.Log("cellTerreCount " + cellTerreCount + " % " + (float)cellTerreCount / cells.Length);
         cellTypePercent[CellType.Eau] = ((float) cellEauCount / cells.Length) * 100;
         cellTypePercent[CellType.Gaz] = ((float) cellGazCount / cells.Length )* 100;
         cellTypePercent[CellType.Terre] = ((float) cellTerreCount / cells.Length) * 100;
     }
 
-    //verifier si la majorité des cell on été colorisé genre + de 95 pc
+    // check if 95% or more cells has been painted
     private bool DoneColoring(float seuil = 0.95f) {
         float percentColoried= (float)cells.Where(x => x.coloried == true).Count() / cells.Length;
         if (percentColoried >= seuil) {
@@ -214,7 +207,8 @@ public class Planet : MonoBehaviour {
         }
         return hit;
     }
-    //check if match any planetNam scritableobject
+
+    //check if match any planetName math current planet
     public string getHiddenName() {
         foreach (PlanetName item in PossibleNames) {
             if (Match(item)) {
@@ -236,7 +230,7 @@ public class Planet : MonoBehaviour {
         }
         return false;
     }
-
+    //is tocheck with range with incertitude
     bool Range(float tocheck ,float with,float incertitude = 5f) {
         float bot = with - incertitude;
         float top = with + incertitude;
@@ -246,9 +240,7 @@ public class Planet : MonoBehaviour {
         return false;
     }
 
-    private void OnDrawGizmos() {
-        Gizmos.DrawWireSphere(transform.position, rayon);
-    }
+    
 
 }
 
